@@ -118,6 +118,7 @@ class CoreParser(GenericParser):
     def p_letter(self, args):
         '''
             letter ::= arch
+            letter ::= alpha
             letter ::= bravo
             letter ::= charlie
             letter ::= delta
