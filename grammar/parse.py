@@ -3,10 +3,12 @@
 from spark import GenericParser
 from spark import GenericASTBuilder
 from ast import AST
+from os import system
 
 class GrammaticalError(Exception):
-    def __init__(self, string):
-        self.string = string
+    def __init__(self, token):
+        self.string = "Unexpected token `{}' (word number {})".format(token, token.wordno)
+        system('notify-send "Unexpected token" "{}"'.format(str(token)))
     def __str__(self):
         return self.string
 
@@ -18,8 +20,7 @@ class CoreParser(GenericParser):
         return token.type
 
     def error(self, token):
-        raise GrammaticalError(
-            "Unexpected token `%s' (word number %d)" % (token, token.wordno))
+        raise GrammaticalError(token)
 
     def p_chained_commands(self, args):
         '''
