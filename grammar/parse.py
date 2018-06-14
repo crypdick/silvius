@@ -148,7 +148,11 @@ class CoreParser(GenericParser):
             letter ::= yankee
             letter ::= zulu
         '''
-        if(args[0].type == 'expert'): args[0].type = 'x'
+        # note: arch is more easy to recognize than alpha
+        #  return the first letter of arg, unless the arg is "expert"
+        # in which case override letter "x" over "e" 
+        if(args[0].type == 'expert'): 
+        	args[0].type = 'x'
         return AST('char', [ args[0].type[0] ])
 
     def p_character(self, args):
@@ -179,6 +183,7 @@ class CoreParser(GenericParser):
             character ::= slash
             character ::= question
             character ::= comma
+            character ::= coma
             character ::= green
         '''
         value = {
@@ -208,6 +213,7 @@ class CoreParser(GenericParser):
             'slash': 'slash',
             'question': 'question',
             'comma': 'comma',
+            'coma': 'comma',
             'green': 'grave'
         }
         return AST('raw_char', [ value[args[0].type] ])
