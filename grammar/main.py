@@ -7,6 +7,7 @@ from parse import GrammaticalError
 from parse import SingleInputParser
 from execute import execute
 from ast import printAST
+from os import system
 
 if __name__ == '__main__':
     import sys
@@ -28,8 +29,10 @@ if __name__ == '__main__':
         try:
             ast = parse(parser, scan(line))
             printAST(ast)
+            system('notify-send "Accepted:" "{}"'.format(line))
             execute(ast, f == sys.stdin)
         except GrammaticalError as e:
+            system('notify-send "Rejected:" "{} (caused by word #{})"'.format(line, e.wordno))
             print "Error:", e
 
     if f != sys.stdin:

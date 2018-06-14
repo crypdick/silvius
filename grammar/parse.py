@@ -7,8 +7,8 @@ from os import system
 
 class GrammaticalError(Exception):
     def __init__(self, token):
+        self.wordno = token.wordno
         self.string = "Unexpected token `{}' (word number {})".format(token, token.wordno)
-        system('notify-send "Unexpected token" "{}"'.format(str(token)))
     def __str__(self):
         return self.string
 
