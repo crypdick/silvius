@@ -184,6 +184,7 @@ class CoreParser(GenericParser):
             character ::= question
             character ::= comma
             character ::= coma
+            character ::= common
             character ::= green
         '''
         value = {
@@ -214,6 +215,7 @@ class CoreParser(GenericParser):
             'question': 'question',
             'comma': 'comma',
             'coma': 'comma',
+            'common': 'comma',
             'green': 'grave'
         }
         return AST('raw_char', [ value[args[0].type] ])
