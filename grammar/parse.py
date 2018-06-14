@@ -175,6 +175,7 @@ class CoreParser(GenericParser):
             character ::= late
             character ::= rate
             character ::= minus
+            character ::= dash
             character ::= underscore
             character ::= plus
             character ::= backslash
@@ -206,6 +207,7 @@ class CoreParser(GenericParser):
             'late': 'parenleft',
             'rate': 'parenright',
             'minus': 'minus',
+            'dash': 'minus',
             'underscore': 'underscore',
             'plus': 'plus',
             'backslash': 'backslash',
