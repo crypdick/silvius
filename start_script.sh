@@ -1,6 +1,7 @@
 #!/bin/zsh
 
 sudo systemctl start docker.service
+# Ubuntu: sudo service docker start
 IP=172.17.0.2
 
 echo $IP
@@ -25,7 +26,7 @@ docker run -d voxhub/silvius-worker /root/worker.sh -u ws://$IP:8019/worker/ws/s
 
 echo "starting silvius client"
 
-cd ~/bin/voice2code/silvius-crypdick && python2 stream/mic.py --server $IP --device 7 --audio-gate 50 | python2 grammar/main.py
+cd ~/bin/voice2code/silvius-crypdick && python2 stream/mic.py --server $IP --device 4 --audio-gate 1 --keep-going | python2 grammar/main.py
 
 #--audio-gate 
 #--keep-going 
