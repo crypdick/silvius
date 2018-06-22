@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 sudo systemctl start docker.service
-# Ubuntu: sudo service docker start
+# for Ubuntu: sudo service docker start
 IP=172.17.0.2
 
 echo $IP
