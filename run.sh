@@ -49,7 +49,7 @@ case "$action" in
         ;;
     -G|--show-gate)
         check_microphone
-        python2 stream/audio-gate-level.py -d $which
+        python2 stream/audio-gate-level.py -d 6
         ;;
     *)
         echo "Unknown command '$action'. Run with --help to see usage."
