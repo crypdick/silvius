@@ -65,48 +65,153 @@ class CoreParser(GenericParser):
     def p_repeat(self, args):
         '''
             repeat ::=
-            repeat ::= _number
+            repeat ::= number_set
         '''
         if len(args) > 0:
             return args[0]
         else:
             return None
 
+    small_numbers = {
+        'zero'      : 0,
+        'one'       : 1,
+        'two'       : 2,
+        'three'     : 3,
+        'four'      : 4,
+        'five'      : 5,
+        'six'       : 6,
+        'seven'     : 7,
+        'eight'     : 8,
+        'nine'      : 9,
+        'ten'       : 10,
+        'eleven'    : 11,
+        'twelve'    : 12,
+        'thirteen'  : 13,
+        'fourteen'  : 14,
+        'fifteen'   : 15,
+        'sixteen'   : 16,
+        'seventeen' : 17,
+        'eighteen'  : 18,
+        'nineteen'  : 19,
+
+        # sadly, kaldi often recognizes these by accident
+        'to'        : 2,
+        'for'       : 4,
+    }
     def p_number_rule(self, args):
         '''
-            number_rule ::= number _number
+            number_rule ::= number number_set
+            number_rule ::= number thousand_number_set
+            number_rule ::= number million_number_set
+            number_rule ::= number billion_number_set
         '''
-        return AST('char', [ chr(ord('0') + args[1]) ])
-
-    def p__number(self, args):
+        return AST('sequence', [ str(args[1]) ])
+    def p_number_set(self, args):
         '''
-            _number ::= zero
-            _number ::= one
-            _number ::= two
-            _number ::= three
-            _number ::= four
-            _number ::= five
-            _number ::= six
-            _number ::= seven
-            _number ::= eight
-            _number ::= nine
+            number_set ::= _firstnumbers
+            number_set ::= _tens
+            number_set ::= _tens _ones
+            number_set ::= _hundreds
+            number_set ::= _hundreds _firstnumbers
+            number_set ::= _hundreds _tens
+            number_set ::= _hundreds _tens _ones
         '''
-        # doesn't work right now
-        #for v in value:
-        #    self.__doc__ += "number ::= " + v
+        return sum(args)
+    def p__ones(self, args):
+        '''
+            _ones ::= one
+            _ones ::= two
+            _ones ::= three
+            _ones ::= four
+            _ones ::= five
+            _ones ::= six
+            _ones ::= seven
+            _ones ::= eight
+            _ones ::= nine
+            _ones ::= to
+            _ones ::= for
+        '''
+        return self.small_numbers[args[0].type]
+    def p__firstnumbers(self, args):
+        '''
+            _firstnumbers ::= zero
+            _firstnumbers ::= one
+            _firstnumbers ::= two
+            _firstnumbers ::= three
+            _firstnumbers ::= four
+            _firstnumbers ::= five
+            _firstnumbers ::= six
+            _firstnumbers ::= seven
+            _firstnumbers ::= eight
+            _firstnumbers ::= nine
+            _firstnumbers ::= ten
+            _firstnumbers ::= eleven
+            _firstnumbers ::= twelve
+            _firstnumbers ::= thirteen
+            _firstnumbers ::= fourteen
+            _firstnumbers ::= fifteen
+            _firstnumbers ::= sixteen
+            _firstnumbers ::= seventeen
+            _firstnumbers ::= eighteen
+            _firstnumbers ::= nineteen
+            _firstnumbers ::= to
+            _firstnumbers ::= for
+        '''
+        return self.small_numbers[args[0].type]
+    def p__tens(self, args):
+        '''
+            _tens ::= twenty
+            _tens ::= thirty
+            _tens ::= forty
+            _tens ::= fifty
+            _tens ::= sixty
+            _tens ::= seventy
+            _tens ::= eighty
+            _tens ::= ninety
+        '''
         value = {
-            'zero'  : 0,
-            'one'   : 1,
-            'two'   : 2,
-            'three' : 3,
-            'four'  : 4,
-            'five'  : 5,
-            'six'   : 6,
-            'seven' : 7,
-            'eight' : 8,
-            'nine'  : 9
+            'twenty'   : 20,
+            'thirty'   : 30,
+            'forty'    : 40,
+            'fifty'    : 50,
+            'sixty'    : 60,
+            'seventy'  : 70,
+            'eighty'   : 80,
+            'ninety'   : 90
         }
         return value[args[0].type]
+    def p__hundreds(self, args):
+        '''
+            _hundreds ::= _ones hundred
+        '''
+        return args[0] * 100
+    def p_thousand_number_set(self, args):
+        '''
+            thousand_number_set ::= number_set thousand
+            thousand_number_set ::= number_set thousand number_set
+        '''
+        total = args[0] * 1000
+        if len(args) > 2: total += args[2]
+        return total
+    def p_million_number_set(self, args):
+        '''
+            million_number_set ::= number_set million
+            million_number_set ::= number_set million number_set
+            million_number_set ::= number_set million thousand_number_set
+        '''
+        total = args[0] * 1000000
+        if len(args) > 2: total += args[2]
+        return total
+    def p_billion_number_set(self, args):
+        '''
+            billion_number_set ::= number_set billion
+            billion_number_set ::= number_set billion number_set
+            billion_number_set ::= number_set billion thousand_number_set
+            billion_number_set ::= number_set billion million_number_set
+        '''
+        total = args[0] * 1000000000
+        if len(args) > 2: total += args[2]
+        return total
 
     def p_sky_letter(self, args):
         '''
@@ -305,6 +410,8 @@ class CoreParser(GenericParser):
             raw_word ::= seven
             raw_word ::= eight
             raw_word ::= nine
+            raw_word ::= to
+            raw_word ::= for
         '''
         if(args[0].type == 'ANY'):
             return args[0].extra
@@ -312,7 +419,12 @@ class CoreParser(GenericParser):
 
 class SingleInputParser(CoreParser):
     def __init__(self):
+        # if you have the issue that commands fail because spurious
+        # tokens ('i', 'the',...) are prepended to the acual command,
+        # try commenting the 'single_input' line, and uncommenting
+        # the 'single_input_discard_junk' line.
         CoreParser.__init__(self, 'single_input')
+        #CoreParser.__init__(self, 'single_input_discard_junk')
         self.sleeping = False
 
     def p_sleep_commands(self, args):
@@ -338,6 +450,31 @@ class SingleInputParser(CoreParser):
             return args[0]
         else:
             return AST('')
+
+    def p_single_input_discard_junk(self, args):
+        '''
+            single_input_discard_junk ::= END
+            single_input_discard_junk ::= junk_tokens sleep_commands END
+            single_input_discard_junk ::= junk_tokens chained_commands END
+        '''
+        if len(args) > 1 and not self.sleeping:
+            return args[1]
+        else:
+            return AST('')
+
+    # With some models, Kaldi may return spurious tokens in response
+    # to noise. If that happens just before we say a command, it will
+    # make the command fail. This "dummy" rule will swallows these tokens.
+    def p_junk_tokens(self, args):
+        '''
+            junk_tokens ::=
+            junk_tokens ::= i junk_tokens
+            junk_tokens ::= the junk_tokens
+            junk_tokens ::= a junk_tokens
+            junk_tokens ::= and junk_tokens
+        '''
+        return AST('')
+
 
 def parse(parser, tokens):
     return parser.parse(tokens)
